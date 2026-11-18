@@ -64,6 +64,16 @@ on:
         required: false
         default: ""
         type: string
+      permissions:
+        description: "أذونات مفعّلة مفصولة بفاصلة، مثل CAMERA,LOCATION"
+        required: false
+        default: ""
+        type: string
+      features:
+        description: "قدرات مفعّلة: notifications,background,shortcuts,quick_tile"
+        required: false
+        default: ""
+        type: string
 
 permissions:
   contents: write
@@ -86,6 +96,8 @@ jobs:
       SOURCE_URL: ${{ inputs.source_url || inputs.web_url }}
       ICON_URL: ${{ inputs.icon_url }}
       ICON_DARK_URL: ${{ inputs.icon_dark_url }}
+      PERMISSIONS: ${{ inputs.permissions }}
+      FEATURES: ${{ inputs.features }}
       BUILD_ID: ${{ inputs.build_id }}
       WORK_DIR: apk-build
 
@@ -228,6 +240,7 @@ jobs:
             echo "تجهيز أيقونة الوضع الداكن…"
             rm -rf /tmp/res-light && mkdir -p /tmp/res-light
             cp -r "$RES"/mipmap-* /tmp/res-light/
+            cp "$RES/values/ic_launcher_background.xml" /tmp/bg-light.xml 2>/dev/null || true
 
             curl -fsSL --retry 3 --max-time 120 "$ICON_DARK_URL" -o /tmp/icon-dark.png
             convert /tmp/icon-dark.png -background none -gravity center \
@@ -246,6 +259,10 @@ jobs:
 
             # إعادة أيقونة الوضع الفاتح كافتراضي.
             cp -r /tmp/res-light/* "$RES"/
+            cp /tmp/bg-light.xml "$RES/values/ic_launcher_background.xml" 2>/dev/null || true
+            mkdir -p "$RES/values-night"
+            cp /tmp/bg-light.xml "$RES/values-night/ic_launcher_background.xml" 2>/dev/null || true
+            sed -i 's/#[0-9A-Fa-f]\{6,8\}/#000000/' "$RES/values-night/ic_launcher_background.xml" 2>/dev/null || true
             ls -d "$RES"/mipmap-night-* >/dev/null
           fi
 
@@ -277,6 +294,121 @@ jobs:
           PY
 
           grep -n "applicationId\|versionCode\|versionName" android/app/build.gradle
+
+      - name: تفعيل الأذونات والاختصارات والزر السريع والإشعارات
+        run: |
+          set -euo pipefail
+          cd "$WORK_DIR"
+          python3 - <<'PY'
+          import os, re, pathlib
+
+          manifest_path = "android/app/src/main/AndroidManifest.xml"
+          manifest = open(manifest_path, encoding="utf-8").read()
+          pkg = os.environ["PACKAGE_ID"]
+
+          permissions = [p.strip().upper() for p in os.environ.get("PERMISSIONS", "").split(",") if p.strip()]
+          features = [f.strip().lower() for f in os.environ.get("FEATURES", "").split(",") if f.strip()]
+
+          PERMISSION_MAP = {
+              "CAMERA": ["android.permission.CAMERA", "android.permission.CAMERA"],
+              "MICROPHONE": ["android.permission.RECORD_AUDIO", "android.permission.MODIFY_AUDIO_SETTINGS"],
+              "LOCATION": ["android.permission.ACCESS_FINE_LOCATION", "android.permission.ACCESS_COARSE_LOCATION"],
+              "NOTIFICATIONS": ["android.permission.POST_NOTIFICATIONS", "android.permission.VIBRATE"],
+              "STORAGE": ["android.permission.READ_MEDIA_IMAGES", "android.permission.READ_EXTERNAL_STORAGE"],
+              "CONTACTS": ["android.permission.READ_CONTACTS"],
+              "PHONE": ["android.permission.READ_PHONE_STATE", "android.permission.CALL_PHONE"],
+              "VIBRATE": ["android.permission.VIBRATE"],
+          }
+
+          needed = {"android.permission.INTERNET", "android.permission.ACCESS_NETWORK_STATE"}
+          for name in permissions:
+              for item in PERMISSION_MAP.get(name, []):
+                  needed.add(item)
+
+          if "notifications" in features:
+              needed.update(["android.permission.POST_NOTIFICATIONS", "android.permission.VIBRATE"])
+          if "background" in features:
+              needed.update([
+                  "android.permission.FOREGROUND_SERVICE",
+                  "android.permission.FOREGROUND_SERVICE_DATA_SYNC",
+                  "android.permission.WAKE_LOCK",
+                  "android.permission.RECEIVE_BOOT_COMPLETED",
+              ])
+          if "quick_tile" in features:
+              needed.add("android.permission.BIND_QUICK_SETTINGS_TILE")
+
+          present = set(re.findall(r'android:name="([^"]+)"', manifest))
+          additions = "".join(
+              '\n    <uses-permission android:name="%s" />' % item
+              for item in sorted(needed)
+              if item not in present
+          )
+          if additions:
+              manifest = re.sub(r'(\n\s*<application)', additions + r'\1', manifest, count=1)
+
+          if "shortcuts" in features:
+              xml_dir = pathlib.Path("android/app/src/main/res/xml")
+              xml_dir.mkdir(parents=True, exist_ok=True)
+              shortcuts = (
+                  '<?xml version="1.0" encoding="utf-8"?>\n'
+                  '<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">\n'
+                  '    <shortcut\n'
+                  '        android:shortcutId="open_app"\n'
+                  '        android:enabled="true"\n'
+                  '        android:icon="@mipmap/ic_launcher"\n'
+                  '        android:shortcutShortLabel="@string/app_name"\n'
+                  '        android:shortcutLongLabel="@string/app_name">\n'
+                  '        <intent\n'
+                  '            android:action="android.intent.action.MAIN"\n'
+                  '            android:targetPackage="' + pkg + '"\n'
+                  '            android:targetClass="' + pkg + '.MainActivity" />\n'
+                  '    </shortcut>\n'
+                  '</shortcuts>\n'
+              )
+              (xml_dir / "shortcuts.xml").write_text(shortcuts, encoding="utf-8")
+              meta = '\n            <meta-data android:name="android.app.shortcuts" android:resource="@xml/shortcuts" />'
+              manifest = manifest.replace("</activity>", meta + "\n        </activity>", 1)
+
+          if "quick_tile" in features:
+              java_dir = pathlib.Path("android/app/src/main/java") / pkg.replace(".", "/")
+              java_dir.mkdir(parents=True, exist_ok=True)
+              java = (
+                  "package " + pkg + ";\n\n"
+                  "import android.content.Intent;\n"
+                  "import android.service.quicksettings.TileService;\n\n"
+                  "public class NuxQuickTile extends TileService {\n"
+                  "    @Override\n"
+                  "    public void onClick() {\n"
+                  "        super.onClick();\n"
+                  "        Intent intent = new Intent(this, MainActivity.class);\n"
+                  "        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);\n"
+                  "        try {\n"
+                  "            startActivityAndCollapse(intent);\n"
+                  "        } catch (Exception error) {\n"
+                  "            startActivity(intent);\n"
+                  "        }\n"
+                  "    }\n"
+                  "}\n"
+              )
+              (java_dir / "NuxQuickTile.java").write_text(java, encoding="utf-8")
+              service = (
+                  '\n        <service\n'
+                  '            android:name=".NuxQuickTile"\n'
+                  '            android:label="@string/app_name"\n'
+                  '            android:icon="@mipmap/ic_launcher"\n'
+                  '            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"\n'
+                  '            android:exported="true">\n'
+                  '            <intent-filter>\n'
+                  '                <action android:name="android.service.quicksettings.action.QS_TILE" />\n'
+                  '            </intent-filter>\n'
+                  '        </service>'
+              )
+              manifest = manifest.replace("</application>", service + "\n    </application>", 1)
+
+          open(manifest_path, "w", encoding="utf-8").write(manifest)
+          print("الأذونات المضافة:", ", ".join(sorted(needed)))
+          print("القدرات المفعّلة:", ", ".join(features) or "لا شيء")
+          PY
 
       - name: بناء ملف APK
         run: |
