@@ -46,10 +46,21 @@ on:
         type: string
       source_url:
         description: "رابط المصدر (صفحة HTML أو رابط الموقع)"
-        required: true
+        required: false
+        default: ""
+        type: string
+      web_url:
+        description: "اسم بديل لرابط المصدر"
+        required: false
+        default: ""
         type: string
       icon_url:
-        description: "رابط صورة الأيقونة PNG"
+        description: "رابط صورة أيقونة الوضع الفاتح PNG"
+        required: false
+        default: ""
+        type: string
+      icon_dark_url:
+        description: "رابط صورة أيقونة الوضع الداكن PNG"
         required: false
         default: ""
         type: string
@@ -72,8 +83,9 @@ jobs:
       VERSION_NAME: ${{ inputs.version_name }}
       VERSION_CODE: ${{ inputs.version_code }}
       SOURCE_TYPE: ${{ inputs.source_type }}
-      SOURCE_URL: ${{ inputs.source_url }}
+      SOURCE_URL: ${{ inputs.source_url || inputs.web_url }}
       ICON_URL: ${{ inputs.icon_url }}
+      ICON_DARK_URL: ${{ inputs.icon_dark_url }}
       BUILD_ID: ${{ inputs.build_id }}
       WORK_DIR: apk-build
 
@@ -94,10 +106,28 @@ jobs:
 
       - name: تثبيت Android SDK
         uses: android-actions/setup-android@v3
+        with:
+          # حزمة "tools" القديمة أُزيلت من مستودع Google، وطلبها يُفشل التثبيت.
+          packages: platform-tools
+
+      - name: تخزين مؤقت لحزم Gradle و npm
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            ~/.npm
+            apk-build/node_modules
+          key: apk-cache-${{ runner.os }}-v1
+          restore-keys: apk-cache-${{ runner.os }}-
 
       - name: تثبيت حزم Android المطلوبة
         run: |
           set -euo pipefail
+          if [ -z "$SOURCE_URL" ]; then
+            echo "لم يصل رابط المصدر إلى البناء."
+            exit 1
+          fi
           yes | sdkmanager --licenses >/dev/null 2>&1 || true
           sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0" >/dev/null
 
@@ -170,15 +200,19 @@ jobs:
 
           npx cap add android
 
-      - name: توليد أيقونات الأندرويد
+      - name: توليد أيقونات الأندرويد (فاتح وداكن)
         run: |
           set -euo pipefail
           cd "$WORK_DIR"
           mkdir -p assets
+          RES="android/app/src/main/res"
+          command -v convert >/dev/null || sudo apt-get install -y --no-install-recommends imagemagick >/dev/null
+
+          # ---- الأيقونة الافتراضية: الوضع الفاتح ----
           if [ -n "$ICON_URL" ]; then
-            echo "تنزيل أيقونة التطبيق…"
-            curl -fsSL --retry 3 --max-time 120 "$ICON_URL" -o /tmp/icon-source.png
-            convert /tmp/icon-source.png -background none -gravity center \
+            echo "تنزيل أيقونة الوضع الفاتح…"
+            curl -fsSL --retry 3 --max-time 120 "$ICON_URL" -o /tmp/icon-light.png
+            convert /tmp/icon-light.png -background none -gravity center \
               -resize 1024x1024 -extent 1024x1024 assets/icon.png
           else
             convert -size 1024x1024 gradient:'#0A84FF'-'#7C5CFF' assets/icon.png
@@ -186,8 +220,34 @@ jobs:
           convert assets/icon.png -background '#ffffff' -gravity center \
             -resize 1024x1024 -extent 2732x2732 assets/splash.png
           npx capacitor-assets generate --android \
-            --iconBackgroundColor '#ffffff' --iconBackgroundColorDark '#000000' \
+            --iconBackgroundColor '#ffffff' --iconBackgroundColorDark '#ffffff' \
             --splashBackgroundColor '#ffffff' --splashBackgroundColorDark '#000000'
+
+          # ---- أيقونة الوضع الداكن: تُحفظ في مجلدات night ----
+          if [ -n "$ICON_DARK_URL" ]; then
+            echo "تجهيز أيقونة الوضع الداكن…"
+            rm -rf /tmp/res-light && mkdir -p /tmp/res-light
+            cp -r "$RES"/mipmap-* /tmp/res-light/
+
+            curl -fsSL --retry 3 --max-time 120 "$ICON_DARK_URL" -o /tmp/icon-dark.png
+            convert /tmp/icon-dark.png -background none -gravity center \
+              -resize 1024x1024 -extent 1024x1024 assets/icon.png
+            npx capacitor-assets generate --android \
+              --iconBackgroundColor '#000000' --iconBackgroundColorDark '#000000' \
+              --splashBackgroundColor '#ffffff' --splashBackgroundColorDark '#000000'
+
+            for dir in "$RES"/mipmap-*; do
+              name=$(basename "$dir")
+              case "$name" in mipmap-night-*) continue ;; esac
+              night="mipmap-night-${name#mipmap-}"
+              rm -rf "$RES/$night"
+              cp -r "$dir" "$RES/$night"
+            done
+
+            # إعادة أيقونة الوضع الفاتح كافتراضي.
+            cp -r /tmp/res-light/* "$RES"/
+            ls -d "$RES"/mipmap-night-* >/dev/null
+          fi
 
       - name: ضبط اسم التطبيق والإصدار ومعرّف الحزمة
         run: |
@@ -235,15 +295,14 @@ jobs:
             echo "لم يُنتج ملف APK."
             exit 1
           fi
-          SLUG=$(node -e 'const parts=process.env.PACKAGE_ID.split(".");console.log((parts[parts.length-1]||"app")+"-v"+process.env.VERSION_NAME)')
-          cp "$APK_FILE" "dist/${SLUG}.apk"
+          cp "$APK_FILE" "dist/app-release.apk"
           ls -lh dist
 
       - name: رفع ملف APK كـ Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: apk-${{ inputs.build_id }}
-          path: apk-build/dist/*.apk
+          name: app-release-${{ github.run_id }}
+          path: apk-build/dist/app-release.apk
           retention-days: 30
           if-no-files-found: error
 
@@ -254,6 +313,6 @@ jobs:
           set -euo pipefail
           cd "$WORK_DIR"
           gh release delete "apk-$BUILD_ID" --yes --cleanup-tag >/dev/null 2>&1 || true
-          gh release create "apk-$BUILD_ID" dist/*.apk \
+          gh release create "apk-$BUILD_ID" dist/app-release.apk \
             --title "$APP_NAME v$VERSION_NAME" \
             --notes "تطبيق أندرويد مبني من منصة نوكس. معرّف الحزمة: $PACKAGE_ID — الإصدار: $VERSION_NAME ($VERSION_CODE)"
