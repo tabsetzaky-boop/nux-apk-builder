@@ -1,0 +1,259 @@
+# بناء ملف APK لتطبيق جاهز للتثبيت على أندرويد
+# ارفع هذا الملف إلى مستودع GitHub في المسار: .github/workflows/build-apk.yml
+#
+# المتطلبات في المستودع:
+#   1) GitHub Actions مفعّلة.
+#   2) السرّ في المنصة: GITHUB_APK_BUILDER_TOKEN (صلاحية Actions: read/write و Contents: read/write).
+#   3) يُستخدم الفرع الافتراضي للمستودع تلقائيًا.
+#
+# البناء يجري داخل مجلد apk-build ولا يمسّ ملفات المستودع الأخرى.
+# التطبيق الناتج موقّع بمفتاح debug الرسمي لأندرويد، لذا يُثبَّت مباشرة على الهواتف
+# دون مشاكل شهادة، لكنه غير مناسب للنشر على Google Play.
+
+name: Build Nux APK
+
+run-name: "APK ${{ inputs.build_id }}"
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_id:
+        description: "معرّف البناء في منصة نوكس"
+        required: true
+        type: string
+      app_name:
+        description: "اسم التطبيق"
+        required: true
+        type: string
+      package_id:
+        description: "معرّف الحزمة، مثال: com.nux.myapp"
+        required: true
+        type: string
+      version_name:
+        description: "رقم الإصدار الظاهر، مثال: 1.0.0"
+        required: false
+        default: "1.0.0"
+        type: string
+      version_code:
+        description: "رقم البناء الداخلي، مثال: 1"
+        required: false
+        default: "1"
+        type: string
+      source_type:
+        description: "site = صفحة HTML تُنزَّل وتُضمَّن داخل التطبيق، url = موقع يُفتح عن بُعد"
+        required: false
+        default: "url"
+        type: string
+      source_url:
+        description: "رابط المصدر (صفحة HTML أو رابط الموقع)"
+        required: true
+        type: string
+      icon_url:
+        description: "رابط صورة الأيقونة PNG"
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: apk-${{ inputs.build_id }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      APP_NAME: ${{ inputs.app_name }}
+      PACKAGE_ID: ${{ inputs.package_id }}
+      VERSION_NAME: ${{ inputs.version_name }}
+      VERSION_CODE: ${{ inputs.version_code }}
+      SOURCE_TYPE: ${{ inputs.source_type }}
+      SOURCE_URL: ${{ inputs.source_url }}
+      ICON_URL: ${{ inputs.icon_url }}
+      BUILD_ID: ${{ inputs.build_id }}
+      WORK_DIR: apk-build
+
+    steps:
+      - name: جلب ملفات المستودع
+        uses: actions/checkout@v4
+
+      - name: تثبيت Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: تثبيت Java JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: تثبيت Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: تثبيت حزم Android المطلوبة
+        run: |
+          set -euo pipefail
+          yes | sdkmanager --licenses >/dev/null 2>&1 || true
+          sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0" >/dev/null
+
+      - name: تثبيت Capacitor
+        run: |
+          set -euo pipefail
+          mkdir -p "$WORK_DIR"
+          cd "$WORK_DIR"
+          npm init -y >/dev/null
+          npm install --no-audit --no-fund --loglevel=error \
+            @capacitor/core@6 @capacitor/cli@6 @capacitor/android@6 @capacitor/assets@3
+
+      - name: تجهيز مشروع الويب وإعداد Capacitor
+        run: |
+          set -euo pipefail
+          cd "$WORK_DIR"
+          mkdir -p www assets dist
+
+          node - <<'NODE'
+          const fs = require("fs");
+
+          const config = {
+            appId: process.env.PACKAGE_ID,
+            appName: process.env.APP_NAME,
+            webDir: "www",
+            android: { allowMixedContent: true },
+          };
+          if (process.env.SOURCE_TYPE === "url") {
+            config.server = { url: process.env.SOURCE_URL, cleartext: true };
+          }
+          fs.writeFileSync("capacitor.config.json", JSON.stringify(config, null, 2));
+
+          if (process.env.SOURCE_TYPE !== "site") {
+            const html = `<!doctype html>
+          <html lang="ar" dir="rtl">
+            <head>
+              <meta charset="utf-8" />
+              <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+              <title>${process.env.APP_NAME}</title>
+              <meta http-equiv="refresh" content="1;url=${process.env.SOURCE_URL}" />
+              <style>
+                body { margin:0; min-height:100vh; display:grid; place-items:center;
+                  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+                  background:#ffffff; color:#0a0a0a; }
+                .box { text-align:center; padding:24px; }
+                .dot { width:44px; height:44px; margin:0 auto 14px; border-radius:14px;
+                  background:linear-gradient(135deg,#0a84ff,#7c5cff); }
+                p { font-size:14px; color:#5b6472; margin:0; }
+              </style>
+            </head>
+            <body>
+              <div class="box">
+                <div class="dot"></div>
+                <p>جارٍ فتح ${process.env.APP_NAME}…</p>
+              </div>
+            </body>
+          </html>`;
+            fs.writeFileSync("www/index.html", html);
+          }
+          NODE
+
+          if [ "$SOURCE_TYPE" = "site" ]; then
+            echo "تنزيل صفحة الموقع من نوكس…"
+            curl -fsSL --retry 3 --max-time 120 "$SOURCE_URL" -o www/index.html
+            if ! grep -qi "<html\|<!doctype" www/index.html; then
+              echo "المصدر لم يُرجع صفحة HTML صالحة. تأكد من أن التطبيق منشور."
+              exit 1
+            fi
+          fi
+
+          npx cap add android
+
+      - name: توليد أيقونات الأندرويد
+        run: |
+          set -euo pipefail
+          cd "$WORK_DIR"
+          mkdir -p assets
+          if [ -n "$ICON_URL" ]; then
+            echo "تنزيل أيقونة التطبيق…"
+            curl -fsSL --retry 3 --max-time 120 "$ICON_URL" -o /tmp/icon-source.png
+            convert /tmp/icon-source.png -background none -gravity center \
+              -resize 1024x1024 -extent 1024x1024 assets/icon.png
+          else
+            convert -size 1024x1024 gradient:'#0A84FF'-'#7C5CFF' assets/icon.png
+          fi
+          convert assets/icon.png -background '#ffffff' -gravity center \
+            -resize 1024x1024 -extent 2732x2732 assets/splash.png
+          npx capacitor-assets generate --android \
+            --iconBackgroundColor '#ffffff' --iconBackgroundColorDark '#000000' \
+            --splashBackgroundColor '#ffffff' --splashBackgroundColorDark '#000000'
+
+      - name: ضبط اسم التطبيق والإصدار ومعرّف الحزمة
+        run: |
+          set -euo pipefail
+          cd "$WORK_DIR"
+          python3 - <<'PY'
+          import os, re, html
+
+          path = "android/app/build.gradle"
+          source = open(path, encoding="utf-8").read()
+          package_id = os.environ["PACKAGE_ID"]
+          source = re.sub(r'namespace\s+"[^"]*"', f'namespace "{package_id}"', source, count=1)
+          source = re.sub(r'applicationId\s+"[^"]*"', f'applicationId "{package_id}"', source, count=1)
+          source = re.sub(r'versionCode\s+\d+', f'versionCode {int(os.environ["VERSION_CODE"])}', source, count=1)
+          source = re.sub(r'versionName\s+"[^"]*"', f'versionName "{os.environ["VERSION_NAME"]}"', source, count=1)
+          open(path, "w", encoding="utf-8").write(source)
+
+          strings_path = "android/app/src/main/res/values/strings.xml"
+          strings = open(strings_path, encoding="utf-8").read()
+          strings = re.sub(
+              r'<string name="app_name">.*?</string>',
+              f'<string name="app_name">{html.escape(os.environ["APP_NAME"])}</string>',
+              strings,
+              flags=re.S,
+          )
+          open(strings_path, "w", encoding="utf-8").write(strings)
+          PY
+
+          grep -n "applicationId\|versionCode\|versionName" android/app/build.gradle
+
+      - name: بناء ملف APK
+        run: |
+          set -euo pipefail
+          cd "$WORK_DIR/android"
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon --stacktrace
+
+      - name: تجهيز الملف النهائي
+        run: |
+          set -euo pipefail
+          cd "$WORK_DIR"
+          mkdir -p dist
+          APK_FILE=$(find android/app/build/outputs/apk/debug -name "*.apk" | head -n 1)
+          if [ -z "$APK_FILE" ]; then
+            echo "لم يُنتج ملف APK."
+            exit 1
+          fi
+          SLUG=$(node -e 'const parts=process.env.PACKAGE_ID.split(".");console.log((parts[parts.length-1]||"app")+"-v"+process.env.VERSION_NAME)')
+          cp "$APK_FILE" "dist/${SLUG}.apk"
+          ls -lh dist
+
+      - name: رفع ملف APK كـ Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk-${{ inputs.build_id }}
+          path: apk-build/dist/*.apk
+          retention-days: 30
+          if-no-files-found: error
+
+      - name: نشر ملف APK كإصدار قابل للتحميل
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          cd "$WORK_DIR"
+          gh release delete "apk-$BUILD_ID" --yes --cleanup-tag >/dev/null 2>&1 || true
+          gh release create "apk-$BUILD_ID" dist/*.apk \
+            --title "$APP_NAME v$VERSION_NAME" \
+            --notes "تطبيق أندرويد مبني من منصة نوكس. معرّف الحزمة: $PACKAGE_ID — الإصدار: $VERSION_NAME ($VERSION_CODE)"
