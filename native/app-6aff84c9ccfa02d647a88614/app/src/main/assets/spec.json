@@ -1,0 +1,399 @@
+{
+  "version": 2,
+  "app": {
+    "name": "تواصل",
+    "tagline": "تواصل سريع وآمن في أي وقت ومكان",
+    "package": "com.nux.app",
+    "description": "تطبيق تراسل فوري يدعم المحادثات الفردية والجماعية، إرسال الرسائل، العمل دون اتصال، وتخصيص الملف الشخصي والإشعارات.",
+    "icon": "📱",
+    "iconBackground": "#1778F2",
+    "iconForeground": "#FFFFFF",
+    "adaptive": true
+  },
+  "theme": {
+    "primary": "#1778F2",
+    "background": "#0D0F12",
+    "surface": "#1A1D24",
+    "text": "#F0F4F8",
+    "dark": true,
+    "radius": 18
+  },
+  "start": "login",
+  "screens": [
+    {
+      "id": "login",
+      "title": "تسجيل الدخول",
+      "icon": "🔑",
+      "subtitle": "قم بتسجيل الدخول لبدء المحادثات",
+      "components": [
+        {
+          "type": "image",
+          "emoji": "💬",
+          "caption": "مرحباً بك في تطبيق تواصل",
+          "height": 120
+        },
+        {
+          "type": "heading",
+          "text": "حسابك الشخصي"
+        },
+        {
+          "type": "form",
+          "fields": [
+            {
+              "field": "name",
+              "label": "الاسم الكامل",
+              "placeholder": "مثال: أحمد محمد",
+              "secure": false
+            },
+            {
+              "field": "phone",
+              "label": "رقم الهاتف",
+              "placeholder": "+966 50 123 4567",
+              "secure": false
+            },
+            {
+              "field": "status",
+              "label": "الحالة",
+              "placeholder": "متاح للتواصل",
+              "secure": false
+            }
+          ],
+          "submitLabel": "دخول / إنشاء حساب",
+          "action": {
+            "type": "add",
+            "data": "user"
+          }
+        },
+        {
+          "type": "button",
+          "label": "الانتقال إلى قائمة المحادثات",
+          "action": {
+            "type": "navigate",
+            "target": "chats"
+          }
+        }
+      ]
+    },
+    {
+      "id": "chats",
+      "title": "المحادثات",
+      "icon": "💬",
+      "subtitle": "دردشاتك الفردية والجماعية",
+      "components": [
+        {
+          "type": "banner",
+          "text": "أنت تعمل الآن في الوضع المحفوظ محلياً (دون اتصال)."
+        },
+        {
+          "type": "stat",
+          "label": "إجمالي المحادثات",
+          "value": "",
+          "source": "chat"
+        },
+        {
+          "type": "heading",
+          "text": "قائمة الدردشات"
+        },
+        {
+          "type": "list",
+          "source": "chat",
+          "titleField": "title",
+          "subtitleField": "last_message",
+          "empty": "لا توجد محادثات حالية، ابدأ محادثة جديدة!",
+          "removable": true,
+          "action": {
+            "type": "none"
+          }
+        },
+        {
+          "type": "divider"
+        },
+        {
+          "type": "heading",
+          "text": "بدء محادثة جديدة"
+        },
+        {
+          "type": "form",
+          "fields": [
+            {
+              "field": "title",
+              "label": "اسم المحادثة أو جهة الاتصال",
+              "placeholder": "مثال: علي حسن",
+              "secure": false
+            },
+            {
+              "field": "last_message",
+              "label": "الرسالة الأولى",
+              "placeholder": "مرحباً، كيف حالك؟",
+              "secure": false
+            },
+            {
+              "field": "type",
+              "label": "نوع المحادثة (فردي / مجموعة)",
+              "placeholder": "فردي",
+              "secure": false
+            }
+          ],
+          "submitLabel": "إنشاء محادثة",
+          "action": {
+            "type": "add",
+            "data": "chat"
+          }
+        }
+      ]
+    },
+    {
+      "id": "chat_detail",
+      "title": "الدردشة",
+      "icon": "✉️",
+      "subtitle": "تبادل الرسائل والملفات",
+      "components": [
+        {
+          "type": "heading",
+          "text": "سجل الرسائل"
+        },
+        {
+          "type": "list",
+          "source": "message",
+          "titleField": "content",
+          "subtitleField": "sender_id",
+          "empty": "لا توجد رسائل في هذه المحادثة بعد.",
+          "removable": true,
+          "action": {
+            "type": "none"
+          }
+        },
+        {
+          "type": "divider"
+        },
+        {
+          "type": "form",
+          "fields": [
+            {
+              "field": "sender_id",
+              "label": "المرسل",
+              "placeholder": "أنت",
+              "secure": false
+            },
+            {
+              "field": "content",
+              "label": "نص الرسالة",
+              "placeholder": "اكتب رسالتك هنا...",
+              "secure": false
+            },
+            {
+              "field": "type",
+              "label": "نوع الرسالة",
+              "placeholder": "نص / صورة / صوت",
+              "secure": false
+            }
+          ],
+          "submitLabel": "إرسال الرسالة",
+          "action": {
+            "type": "add",
+            "data": "message"
+          }
+        }
+      ]
+    },
+    {
+      "id": "groups",
+      "title": "المجموعات",
+      "icon": "👥",
+      "subtitle": "إدارة المجموعات والأعضاء",
+      "components": [
+        {
+          "type": "heading",
+          "text": "المجموعات النشطة"
+        },
+        {
+          "type": "card",
+          "title": "مجموعة العمل والتطوير",
+          "text": "تضم 12 عضواً • آخر نشاط منذ 5 دقائق",
+          "action": {
+            "type": "navigate",
+            "target": "chat_detail"
+          }
+        },
+        {
+          "type": "card",
+          "title": "العائلة والأصدقاء",
+          "text": "تضم 8 أعضاء • آخر نشاط بالأمس",
+          "action": {
+            "type": "navigate",
+            "target": "chat_detail"
+          }
+        },
+        {
+          "type": "divider"
+        },
+        {
+          "type": "heading",
+          "text": "إنشاء مجموعة جديدة"
+        },
+        {
+          "type": "form",
+          "fields": [
+            {
+              "field": "title",
+              "label": "اسم المجموعة",
+              "placeholder": "مثال: فريق التصميم",
+              "secure": false
+            },
+            {
+              "field": "last_message",
+              "label": "وصف أو رسالة الترحيب",
+              "placeholder": "أهلاً بالجميع في المجموعة",
+              "secure": false
+            }
+          ],
+          "submitLabel": "حفظ المجموعة",
+          "action": {
+            "type": "add",
+            "data": "chat"
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile",
+      "title": "الإعدادات",
+      "icon": "⚙️",
+      "subtitle": "الملف الشخصي والخيارات",
+      "components": [
+        {
+          "type": "heading",
+          "text": "بيانات الحساب"
+        },
+        {
+          "type": "list",
+          "source": "user",
+          "titleField": "name",
+          "subtitleField": "status",
+          "empty": "لم يتم تسجيل بيانات حساب بعد.",
+          "removable": false,
+          "action": {
+            "type": "none"
+          }
+        },
+        {
+          "type": "divider"
+        },
+        {
+          "type": "heading",
+          "text": "تفضيلات التطبيق"
+        },
+        {
+          "type": "toggle",
+          "label": "الوضع الداكن (Night Mode)",
+          "field": "dark_mode"
+        },
+        {
+          "type": "toggle",
+          "label": "تفعيل الإشعارات اللحظية",
+          "field": "notifications_enabled"
+        },
+        {
+          "type": "toggle",
+          "label": "حفظ الرسائل للعمل دون اتصال",
+          "field": "offline_mode"
+        },
+        {
+          "type": "button",
+          "label": "مسح كافة المحادثات المحلية",
+          "action": {
+            "type": "clear",
+            "data": "chat"
+          }
+        }
+      ]
+    }
+  ],
+  "data": [
+    {
+      "name": "user",
+      "label": "المستخدمين",
+      "fields": [
+        {
+          "name": "name",
+          "label": "الاسم",
+          "type": "string"
+        },
+        {
+          "name": "phone",
+          "label": "الهاتف",
+          "type": "string"
+        },
+        {
+          "name": "status",
+          "label": "الحالة",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "chat",
+      "label": "المحادثات",
+      "fields": [
+        {
+          "name": "title",
+          "label": "عنوان المحادثة",
+          "type": "string"
+        },
+        {
+          "name": "last_message",
+          "label": "آخر رسالة",
+          "type": "string"
+        },
+        {
+          "name": "type",
+          "label": "نوع المحادثة",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "message",
+      "label": "الرسائل",
+      "fields": [
+        {
+          "name": "content",
+          "label": "محتوى الرسالة",
+          "type": "string"
+        },
+        {
+          "name": "sender_id",
+          "label": "المرسل",
+          "type": "string"
+        },
+        {
+          "name": "type",
+          "label": "نوع الرسالة",
+          "type": "string"
+        }
+      ]
+    }
+  ],
+  "secrets": [
+    {
+      "key": "FIREBASE_CONFIG",
+      "title": "إعدادات فايربيس",
+      "reason": "مطلوبة للتحقق من خط الهاتف وإرسال الإشعارات اللحظية.",
+      "host": "firebase.google.com"
+    }
+  ],
+  "permissions": [
+    "NOTIFICATIONS",
+    "CAMERA",
+    "VIBRATE"
+  ],
+  "features": [
+    "offline"
+  ],
+  "bottomNav": [
+    "chats",
+    "chat_detail",
+    "groups",
+    "profile"
+  ]
+}
