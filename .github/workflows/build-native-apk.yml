@@ -67,6 +67,8 @@ jobs:
         with:
           gradle-version: "8.7"
 
+      # صورة ubuntu-latest تأتي بمثبّت Android SDK جاهزًا؛ لا نستخدم setup-android
+      # لأنها تحاول تثبيت حزمة "tools" القديمة التي أُزيلت من مستودع Google وتُفشل البناء.
       - name: تجهيز Android SDK
         run: |
           set -euo pipefail
@@ -74,7 +76,11 @@ jobs:
           echo "ANDROID_HOME=$ANDROID_HOME" >> "$GITHUB_ENV"
           echo "ANDROID_SDK_ROOT=$ANDROID_HOME" >> "$GITHUB_ENV"
           SDKMANAGER="$(ls -d "$ANDROID_HOME"/cmdline-tools/*/bin/sdkmanager 2>/dev/null | head -n 1)"
-          if [ -z "$SDKMANAGER" ]; then echo "no sdkmanager"; exit 1; fi
+          if [ -z "$SDKMANAGER" ]; then
+            echo "لم يُعثر على sdkmanager في $ANDROID_HOME"
+            exit 1
+          fi
+          echo "$ANDROID_HOME/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
           yes | "$SDKMANAGER" --licenses >/dev/null 2>&1 || true
           "$SDKMANAGER" --install "platform-tools" "platforms;android-34" "build-tools;34.0.0"
           echo "sdk.dir=$ANDROID_HOME" > "native/${{ inputs.folder }}/local.properties"
@@ -112,7 +118,7 @@ jobs:
           BT=$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -n 1)
           echo "APK: $APK"
           "$ANDROID_HOME/build-tools/$BT/zipalign" -c -v 4 "$APK" | tail -n 2
-          "$ANDROID_HOME/build-tools/$BT/apksigner" verify --print-certs "$APK" | tee signature.txt
+          "$ANDROID_HOME/build-tools/$BT/apksigner" verify --print-certs "$APK" | tee "$GITHUB_WORKSPACE/signature.txt"
           cp "$APK" "$GITHUB_WORKSPACE/app-release.apk"
 
       - name: نشر ملف APK
