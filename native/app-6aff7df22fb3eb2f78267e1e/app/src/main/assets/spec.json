@@ -1,0 +1,483 @@
+{
+  "version": 2,
+  "app": {
+    "name": "متجر نوكس",
+    "tagline": "تسوق أحدث المنتجات بكل سهولة وسرعة",
+    "package": "com.nux.app",
+    "description": "تطبيق متجر إلكتروني متكامل للبيع والشراء مع لوحة تحكم لإدارة المنتجات والطلبات وإتمام الشراء.",
+    "icon": "📱",
+    "iconBackground": "#10B981",
+    "iconForeground": "#FFFFFF",
+    "adaptive": true
+  },
+  "theme": {
+    "primary": "#10B981",
+    "background": "#F9FAFB",
+    "surface": "#FFFFFF",
+    "text": "#111827",
+    "dark": false,
+    "radius": 16
+  },
+  "start": "home",
+  "screens": [
+    {
+      "id": "home",
+      "title": "الرئيسية",
+      "icon": "🏠",
+      "subtitle": "تصفح أحدث العروض والمنتجات",
+      "components": [
+        {
+          "type": "banner",
+          "text": "🔥 خصم 20% على المنتجات الأكثر مبيعاً هذا الأسبوع!"
+        },
+        {
+          "type": "chips",
+          "items": [
+            "الكل",
+            "إلكترونيات",
+            "ملابس",
+            "عطور",
+            "منزلية"
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "المنتجات المتاحة"
+        },
+        {
+          "type": "list",
+          "source": "product",
+          "titleField": "title",
+          "subtitleField": "price",
+          "empty": "لا توجد منتجات حالياً، أضف بعض المنتجات من لوحة الإدارة",
+          "removable": false,
+          "action": {
+            "type": "none"
+          }
+        },
+        {
+          "type": "button",
+          "label": "عرض السلة الشراء",
+          "action": {
+            "type": "navigate",
+            "target": "cart"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cart",
+      "title": "تفاصيل المنتج والسلة",
+      "icon": "🛒",
+      "subtitle": "مراجعة المشتريات وإدارتها",
+      "components": [
+        {
+          "type": "heading",
+          "text": "سلة المشتريات"
+        },
+        {
+          "type": "list",
+          "source": "cart_item",
+          "titleField": "product_id",
+          "subtitleField": "price",
+          "empty": "سلة الشراء فارغة حالياً",
+          "removable": true,
+          "action": {
+            "type": "none"
+          }
+        },
+        {
+          "type": "divider"
+        },
+        {
+          "type": "heading",
+          "text": "إضافة منتج للسلة سريعاً"
+        },
+        {
+          "type": "form",
+          "fields": [
+            {
+              "field": "product_id",
+              "label": "اسم المنتج",
+              "placeholder": "أدخل اسم المنتج",
+              "secure": false
+            },
+            {
+              "field": "price",
+              "label": "السعر (ر.س)",
+              "placeholder": "150",
+              "secure": false
+            },
+            {
+              "field": "quantity",
+              "label": "الكمية",
+              "placeholder": "1",
+              "secure": false
+            }
+          ],
+          "submitLabel": "إضافة إلى السلة",
+          "action": {
+            "type": "add",
+            "data": "cart_item"
+          }
+        },
+        {
+          "type": "button",
+          "label": "الانتقال لإتمام الطلب",
+          "action": {
+            "type": "navigate",
+            "target": "checkout"
+          }
+        }
+      ]
+    },
+    {
+      "id": "checkout",
+      "title": "إتمام الطلب",
+      "icon": "💳",
+      "subtitle": "إدخال بيانات الشحن والدفع",
+      "components": [
+        {
+          "type": "heading",
+          "text": "تفاصيل الشحن والتوصيل"
+        },
+        {
+          "type": "form",
+          "fields": [
+            {
+              "field": "user_id",
+              "label": "اسم العميل",
+              "placeholder": "أدخل اسمك الكامل",
+              "secure": false
+            },
+            {
+              "field": "shipping_address",
+              "label": "عنوان الشحن",
+              "placeholder": "المدينة، الحي، الشارع",
+              "secure": false
+            },
+            {
+              "field": "total_price",
+              "label": "المبلغ الإجمالي (ر.س)",
+              "placeholder": "300",
+              "secure": false
+            },
+            {
+              "field": "status",
+              "label": "حالة الطلب",
+              "placeholder": "قيد الانتظار",
+              "secure": false
+            },
+            {
+              "field": "created_at",
+              "label": "تاريخ الطلب",
+              "placeholder": "2023-10-25",
+              "secure": false
+            }
+          ],
+          "submitLabel": "تأكيد ودفع الطلب",
+          "action": {
+            "type": "add",
+            "data": "order"
+          }
+        },
+        {
+          "type": "button",
+          "label": "العودة للرئيسية",
+          "action": {
+            "type": "navigate",
+            "target": "home"
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile",
+      "title": "طلباتي والملف الشخصي",
+      "icon": "👤",
+      "subtitle": "إدارة الحساب ومتابعة الطلبات",
+      "components": [
+        {
+          "type": "card",
+          "title": "حساب العميل",
+          "text": "مرحباً بك في متجر نوكس. يمكنك متابعة كافة طلباتك السابقة من هنا.",
+          "action": {
+            "type": "none"
+          }
+        },
+        {
+          "type": "heading",
+          "text": "تسجيل / تحديث بيانات الحساب"
+        },
+        {
+          "type": "form",
+          "fields": [
+            {
+              "field": "name",
+              "label": "الاسم الكامل",
+              "placeholder": "محمد أحمد",
+              "secure": false
+            },
+            {
+              "field": "email",
+              "label": "البريد الإلكتروني",
+              "placeholder": "example@domain.com",
+              "secure": false
+            },
+            {
+              "field": "phone",
+              "label": "رقم الهاتف",
+              "placeholder": "0500000000",
+              "secure": false
+            },
+            {
+              "field": "is_admin",
+              "label": "هل أنت مشرف؟ (نعم/لا)",
+              "placeholder": "لا",
+              "secure": false
+            }
+          ],
+          "submitLabel": "حفظ البيانات",
+          "action": {
+            "type": "add",
+            "data": "user"
+          }
+        },
+        {
+          "type": "heading",
+          "text": "سجل الطلبات السابقة"
+        },
+        {
+          "type": "list",
+          "source": "order",
+          "titleField": "user_id",
+          "subtitleField": "status",
+          "empty": "لا توجد طلبات سابقة في حسابك",
+          "removable": false,
+          "action": {
+            "type": "none"
+          }
+        }
+      ]
+    },
+    {
+      "id": "admin",
+      "title": "لوحة الإدارة",
+      "icon": "⚙️",
+      "subtitle": "إدارة المنتجات والطلبات",
+      "components": [
+        {
+          "type": "stat",
+          "label": "إجمالي الطلبات",
+          "value": "",
+          "source": "order"
+        },
+        {
+          "type": "stat",
+          "label": "إجمالي المنتجات",
+          "value": "",
+          "source": "product"
+        },
+        {
+          "type": "heading",
+          "text": "إضافة منتج جديد للمتجر"
+        },
+        {
+          "type": "form",
+          "fields": [
+            {
+              "field": "title",
+              "label": "اسم المنتج",
+              "placeholder": "سماعات لاسلكية",
+              "secure": false
+            },
+            {
+              "field": "description",
+              "label": "الوصف",
+              "placeholder": "سماعات عالية الجودة ومقاومة للماء",
+              "secure": false
+            },
+            {
+              "field": "price",
+              "label": "السعر",
+              "placeholder": "250",
+              "secure": false
+            },
+            {
+              "field": "category",
+              "label": "التصنيف",
+              "placeholder": "إلكترونيات",
+              "secure": false
+            },
+            {
+              "field": "stock",
+              "label": "الكمية المتاحة",
+              "placeholder": "50",
+              "secure": false
+            },
+            {
+              "field": "image_url",
+              "label": "رابط الصورة",
+              "placeholder": "https://...",
+              "secure": false
+            }
+          ],
+          "submitLabel": "نشر المنتج",
+          "action": {
+            "type": "add",
+            "data": "product"
+          }
+        },
+        {
+          "type": "heading",
+          "text": "إدارة الطلبات الواردة"
+        },
+        {
+          "type": "list",
+          "source": "order",
+          "titleField": "shipping_address",
+          "subtitleField": "total_price",
+          "empty": "لا توجد طلبات جديدة لإدارتها",
+          "removable": true,
+          "action": {
+            "type": "none"
+          }
+        }
+      ]
+    }
+  ],
+  "data": [
+    {
+      "name": "product",
+      "label": "المنتجات",
+      "fields": [
+        {
+          "name": "title",
+          "label": "عنوان المنتج",
+          "type": "string"
+        },
+        {
+          "name": "description",
+          "label": "وصف المنتج",
+          "type": "string"
+        },
+        {
+          "name": "price",
+          "label": "السعر",
+          "type": "string"
+        },
+        {
+          "name": "image_url",
+          "label": "رابط الصورة",
+          "type": "string"
+        },
+        {
+          "name": "category",
+          "label": "التصنيف",
+          "type": "string"
+        },
+        {
+          "name": "stock",
+          "label": "المخزون",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "cart_item",
+      "label": "عناصر السلة",
+      "fields": [
+        {
+          "name": "product_id",
+          "label": "اسم المنتج",
+          "type": "string"
+        },
+        {
+          "name": "quantity",
+          "label": "الكمية",
+          "type": "string"
+        },
+        {
+          "name": "price",
+          "label": "السعر",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "order",
+      "label": "الطلبات",
+      "fields": [
+        {
+          "name": "user_id",
+          "label": "اسم العميل",
+          "type": "string"
+        },
+        {
+          "name": "total_price",
+          "label": "السعر الإجمالي",
+          "type": "string"
+        },
+        {
+          "name": "status",
+          "label": "حالة الطلب",
+          "type": "string"
+        },
+        {
+          "name": "created_at",
+          "label": "تاريخ إنشاء الطلب",
+          "type": "string"
+        },
+        {
+          "name": "shipping_address",
+          "label": "عنوان الشحن",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "user",
+      "label": "المستخدمين",
+      "fields": [
+        {
+          "name": "name",
+          "label": "الاسم",
+          "type": "string"
+        },
+        {
+          "name": "email",
+          "label": "البريد الإلكتروني",
+          "type": "string"
+        },
+        {
+          "name": "phone",
+          "label": "الهاتف",
+          "type": "string"
+        },
+        {
+          "name": "is_admin",
+          "label": "مشرف",
+          "type": "string"
+        }
+      ]
+    }
+  ],
+  "secrets": [
+    {
+      "key": "PAYMENT_GATEWAY_KEY",
+      "title": "مفتاح بوابة الدفع",
+      "reason": "تأمين معالجة عمليات الدفع الإلكتروني داخل التطبيق.",
+      "host": "api.stripe.com"
+    }
+  ],
+  "permissions": [],
+  "features": [
+    "offline"
+  ],
+  "bottomNav": [
+    "home",
+    "cart",
+    "profile",
+    "admin"
+  ]
+}
