@@ -1,0 +1,451 @@
+{
+  "version": 2,
+  "app": {
+    "name": "متجر نوكس",
+    "tagline": "تسوق أحدث المنتجات بكل سهولة وسرعة",
+    "package": "com.nux.app",
+    "description": "تطبيق متجر إلكتروني متكامل لعرض المنتجات، إدارتها، وإتمام الطلبات بسهولة مع لوحة إدارة خاصة."
+  },
+  "theme": {
+    "primary": "#2A65F0",
+    "background": "#F8FAFC",
+    "surface": "#FFFFFF",
+    "text": "#0F172A",
+    "dark": false,
+    "radius": 16
+  },
+  "start": "login",
+  "screens": [
+    {
+      "id": "login",
+      "title": "تسجيل الدخول",
+      "icon": "🔑",
+      "subtitle": "مرحباً بك مجدداً في متجر نوكس",
+      "components": [
+        {
+          "type": "image",
+          "emoji": "🛍️",
+          "caption": "تجربة تسوق فريدة ومميزة",
+          "height": 140
+        },
+        {
+          "type": "heading",
+          "text": "تسجيل الدخول للحساب"
+        },
+        {
+          "type": "form",
+          "fields": [
+            {
+              "field": "name",
+              "label": "الاسم الكامل",
+              "placeholder": "أدخل اسمك",
+              "secure": false
+            },
+            {
+              "field": "email",
+              "label": "البريد الإلكتروني",
+              "placeholder": "example@domain.com",
+              "secure": false
+            },
+            {
+              "field": "phone",
+              "label": "رقم الهاتف",
+              "placeholder": "+966500000000",
+              "secure": false
+            }
+          ],
+          "submitLabel": "دخول المتجر",
+          "action": {
+            "type": "navigate",
+            "target": "home"
+          }
+        },
+        {
+          "type": "divider"
+        },
+        {
+          "type": "button",
+          "label": "الانتقال للوحة الإدارة (للتجار)",
+          "action": {
+            "type": "navigate",
+            "target": "admin"
+          }
+        }
+      ]
+    },
+    {
+      "id": "home",
+      "title": "الرئيسية",
+      "icon": "🏠",
+      "subtitle": "استكشف أحدث العروض والمنتجات",
+      "components": [
+        {
+          "type": "banner",
+          "text": "🔥 خصم يصل إلى 30% على جميع الإلكترونيات هذا الأسبوع!"
+        },
+        {
+          "type": "chips",
+          "items": [
+            "الكل",
+            "إلكترونيات",
+            "ملابس",
+            "عطور",
+            "منزلية"
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "قائمة المنتجات"
+        },
+        {
+          "type": "list",
+          "source": "products",
+          "titleField": "title",
+          "subtitleField": "price",
+          "empty": "لا توجد منتجات مضافة حالياً",
+          "removable": false,
+          "action": {
+            "type": "none"
+          }
+        },
+        {
+          "type": "button",
+          "label": "عرض تفاصيل المنتجات والمواصفات",
+          "action": {
+            "type": "navigate",
+            "target": "product_details"
+          }
+        }
+      ]
+    },
+    {
+      "id": "product_details",
+      "title": "تفاصيل المنتج",
+      "icon": "📦",
+      "subtitle": "المواصفات والإضافة للسلة",
+      "components": [
+        {
+          "type": "image",
+          "emoji": "📱",
+          "caption": "منتج مميز بأعلى جودة",
+          "height": 160
+        },
+        {
+          "type": "heading",
+          "text": "تفاصيل المنتج المختار"
+        },
+        {
+          "type": "text",
+          "text": "هذا المنتج مصنوع من أجود المواد ويأتي معضمان لمدة سنة كاملة مع شحن سريع لجميع المناطق."
+        },
+        {
+          "type": "card",
+          "title": "السعر النهائي",
+          "text": "299 ر.س - شامل الضريبة المضافة",
+          "action": {
+            "type": "none"
+          }
+        },
+        {
+          "type": "form",
+          "fields": [
+            {
+              "field": "product_id",
+              "label": "اسم أو رمز المنتج",
+              "placeholder": "هاتف ذكي بلس",
+              "secure": false
+            },
+            {
+              "field": "quantity",
+              "label": "الكمية المطلوبة",
+              "placeholder": "1",
+              "secure": false
+            }
+          ],
+          "submitLabel": "إضافة إلى السلة 🛒",
+          "action": {
+            "type": "add",
+            "data": "cart"
+          }
+        },
+        {
+          "type": "button",
+          "label": "الانتقال إلى سلة التسوق",
+          "action": {
+            "type": "navigate",
+            "target": "cart_screen"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cart_screen",
+      "title": "سلة التسوق",
+      "icon": "🛒",
+      "subtitle": "مراجعة العناصر وإتمام الطلب",
+      "components": [
+        {
+          "type": "heading",
+          "text": "المنتجات في السلة"
+        },
+        {
+          "type": "list",
+          "source": "cart",
+          "titleField": "product_id",
+          "subtitleField": "quantity",
+          "empty": "سلة التسوق فارغة",
+          "removable": true,
+          "action": {
+            "type": "none"
+          }
+        },
+        {
+          "type": "divider"
+        },
+        {
+          "type": "form",
+          "fields": [
+            {
+              "field": "items",
+              "label": "تفاصيل الطلب",
+              "placeholder": "اكتب المنتجات والتفاصيل",
+              "secure": false
+            },
+            {
+              "field": "total_price",
+              "label": "المبلغ الإجمالي (ر.س)",
+              "placeholder": "299",
+              "secure": false
+            },
+            {
+              "field": "status",
+              "label": "حالة الدفع",
+              "placeholder": "مدفوع إلكترونياً",
+              "secure": false
+            }
+          ],
+          "submitLabel": "تأكيد الطلب والشراء 💳",
+          "action": {
+            "type": "add",
+            "data": "orders"
+          }
+        },
+        {
+          "type": "button",
+          "label": "عرض قائمة طلباتي",
+          "action": {
+            "type": "navigate",
+            "target": "my_orders"
+          }
+        }
+      ]
+    },
+    {
+      "id": "my_orders",
+      "title": "طلباتي",
+      "icon": "📋",
+      "subtitle": "متابعة حالة جميع طلباتك",
+      "components": [
+        {
+          "type": "stat",
+          "label": "إجمالي الطلبات",
+          "value": "",
+          "source": "orders"
+        },
+        {
+          "type": "heading",
+          "text": "سجل الطلبات"
+        },
+        {
+          "type": "list",
+          "source": "orders",
+          "titleField": "items",
+          "subtitleField": "status",
+          "empty": "لا توجد طلبات سابقة لديك",
+          "removable": false,
+          "action": {
+            "type": "none"
+          }
+        },
+        {
+          "type": "button",
+          "label": "العودة للتسوق",
+          "action": {
+            "type": "navigate",
+            "target": "home"
+          }
+        }
+      ]
+    },
+    {
+      "id": "admin",
+      "title": "لوحة الإدارة",
+      "icon": "⚙️",
+      "subtitle": "إدارة المنتجات والطلبات الواردة",
+      "components": [
+        {
+          "type": "heading",
+          "text": "إضافة منتج جديد"
+        },
+        {
+          "type": "form",
+          "fields": [
+            {
+              "field": "title",
+              "label": "اسم المنتج",
+              "placeholder": "مثال: سماعات لاسلكية",
+              "secure": false
+            },
+            {
+              "field": "price",
+              "label": "السعر (ر.س)",
+              "placeholder": "150",
+              "secure": false
+            },
+            {
+              "field": "category",
+              "label": "القسم",
+              "placeholder": "إلكترونيات",
+              "secure": false
+            },
+            {
+              "field": "description",
+              "label": "وصف المنتج",
+              "placeholder": "وصف قصير للمنتج...",
+              "secure": false
+            }
+          ],
+          "submitLabel": "حفظ ونشر المنتج",
+          "action": {
+            "type": "add",
+            "data": "products"
+          }
+        },
+        {
+          "type": "divider"
+        },
+        {
+          "type": "heading",
+          "text": "الطلبات الواردة للمتجر"
+        },
+        {
+          "type": "list",
+          "source": "orders",
+          "titleField": "items",
+          "subtitleField": "total_price",
+          "empty": "لا توجد طلبات واردة حالياً",
+          "removable": true,
+          "action": {
+            "type": "none"
+          }
+        }
+      ]
+    }
+  ],
+  "data": [
+    {
+      "name": "users",
+      "label": "المستخدمين",
+      "fields": [
+        {
+          "name": "name",
+          "label": "الاسم",
+          "type": "string"
+        },
+        {
+          "name": "email",
+          "label": "البريد الإلكتروني",
+          "type": "string"
+        },
+        {
+          "name": "phone",
+          "label": "رقم الهاتف",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "products",
+      "label": "المنتجات",
+      "fields": [
+        {
+          "name": "title",
+          "label": "اسم المنتج",
+          "type": "string"
+        },
+        {
+          "name": "description",
+          "label": "الوصف",
+          "type": "string"
+        },
+        {
+          "name": "price",
+          "label": "السعر",
+          "type": "string"
+        },
+        {
+          "name": "category",
+          "label": "القسم",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "cart",
+      "label": "سلة التسوق",
+      "fields": [
+        {
+          "name": "product_id",
+          "label": "المنتج",
+          "type": "string"
+        },
+        {
+          "name": "quantity",
+          "label": "الكمية",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "orders",
+      "label": "الطلبات",
+      "fields": [
+        {
+          "name": "items",
+          "label": "تفاصيل الطلب",
+          "type": "string"
+        },
+        {
+          "name": "total_price",
+          "label": "المبلغ",
+          "type": "string"
+        },
+        {
+          "name": "status",
+          "label": "الحالة",
+          "type": "string"
+        }
+      ]
+    }
+  ],
+  "secrets": [
+    {
+      "key": "PAYMENT_GATEWAY_KEY",
+      "title": "مفتاح بوابة الدفع",
+      "reason": "مطلوب لمعالجة عمليات الدفع الإلكتروني داخل التطبيق.",
+      "host": "api.stripe.com"
+    }
+  ],
+  "permissions": [
+    "NOTIFICATIONS"
+  ],
+  "features": [
+    "offline"
+  ],
+  "bottomNav": [
+    "home",
+    "cart_screen",
+    "my_orders",
+    "admin"
+  ]
+}
