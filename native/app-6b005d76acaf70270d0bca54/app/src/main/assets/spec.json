@@ -1,0 +1,451 @@
+{
+  "version": 2,
+  "app": {
+    "name": "متجر نوكس",
+    "tagline": "تسوق أحدث المنتجات بسهولة وسرعة",
+    "package": "com.nux.app",
+    "description": "تطبيق متجر إلكتروني متكامل يتيح للمستخدمين استعراض المنتجات وتصفح الأقسام الشائعة، والشراء المباشر، وتتبع الطلبات، بالإضافة إلى لوحة إدارة متكاملة للمتجر.",
+    "icon": "📱",
+    "iconBackground": "#0A84FF",
+    "iconForeground": "#FFFFFF",
+    "adaptive": true
+  },
+  "theme": {
+    "primary": "#0A84FF",
+    "background": "#FFFFFF",
+    "surface": "#F4F4F4",
+    "text": "#0D0D0D",
+    "dark": false,
+    "radius": 20
+  },
+  "start": "home",
+  "screens": [
+    {
+      "id": "home",
+      "title": "الرئيسية",
+      "icon": "🏠",
+      "subtitle": "استكشف أحدث المنتجات والعروض",
+      "components": [
+        {
+          "type": "banner",
+          "text": "🔥 خومات موسمية تصل إلى 50% على المنتجات المختارة!"
+        },
+        {
+          "type": "chips",
+          "items": [
+            "الكل",
+            "إلكترونيات",
+            "ملابس",
+            "عطور",
+            "منزليات"
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "المنتجات المتاحة"
+        },
+        {
+          "type": "list",
+          "source": "product",
+          "titleField": "title",
+          "subtitleField": "price",
+          "empty": "لا توجد منتجات متاحة حالياً",
+          "removable": false,
+          "action": {
+            "type": "none"
+          }
+        },
+        {
+          "type": "button",
+          "label": "عرض سلة التسوق",
+          "action": {
+            "type": "navigate",
+            "target": "cart"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cart",
+      "title": "السلة والمنتج",
+      "icon": "🛒",
+      "subtitle": "إدارة المنتجات المختارة وإتمام الشراء",
+      "components": [
+        {
+          "type": "heading",
+          "text": "إضافة منتج للسلة"
+        },
+        {
+          "type": "form",
+          "fields": [
+            {
+              "field": "product_id",
+              "label": "اسم المنتج",
+              "placeholder": "مثال: هاتف ذكي",
+              "secure": false
+            },
+            {
+              "field": "quantity",
+              "label": "الكمية",
+              "placeholder": "1",
+              "secure": false
+            },
+            {
+              "field": "unit_price",
+              "label": "السعر الإجمالي",
+              "placeholder": "100 ر.س",
+              "secure": false
+            }
+          ],
+          "submitLabel": "إضافة إلى السلة",
+          "action": {
+            "type": "add",
+            "data": "cart_item"
+          }
+        },
+        {
+          "type": "divider"
+        },
+        {
+          "type": "heading",
+          "text": "محتويات السلة"
+        },
+        {
+          "type": "list",
+          "source": "cart_item",
+          "titleField": "product_id",
+          "subtitleField": "unit_price",
+          "empty": "السلة فارغة حالياً",
+          "removable": true,
+          "action": {
+            "type": "none"
+          }
+        },
+        {
+          "type": "button",
+          "label": "تأكيد الطلب وإتمام الدفع",
+          "action": {
+            "type": "navigate",
+            "target": "orders"
+          }
+        }
+      ]
+    },
+    {
+      "id": "orders",
+      "title": "طلباتي",
+      "icon": "📦",
+      "subtitle": "تتبع حالة الطلبات السابقة والحالية",
+      "components": [
+        {
+          "type": "stat",
+          "label": "إجمالي الطلبات",
+          "value": "",
+          "source": "order"
+        },
+        {
+          "type": "heading",
+          "text": "تسجيل طلب جديد"
+        },
+        {
+          "type": "form",
+          "fields": [
+            {
+              "field": "user_id",
+              "label": "اسم المشتري",
+              "placeholder": "أدخل اسمك الكامل",
+              "secure": false
+            },
+            {
+              "field": "total_price",
+              "label": "المبلغ الإجمالي",
+              "placeholder": "مثال: 250 ر.س",
+              "secure": false
+            },
+            {
+              "field": "shipping_address",
+              "label": "عنوان التوصيل",
+              "placeholder": "المدينة، الحي، الشارع",
+              "secure": false
+            },
+            {
+              "field": "status",
+              "label": "حالة الطلب",
+              "placeholder": "قيد المعالجة",
+              "secure": false
+            }
+          ],
+          "submitLabel": "تأكيد وإرسال الطلب",
+          "action": {
+            "type": "add",
+            "data": "order"
+          }
+        },
+        {
+          "type": "heading",
+          "text": "سجل الطلبات"
+        },
+        {
+          "type": "list",
+          "source": "order",
+          "titleField": "shipping_address",
+          "subtitleField": "status",
+          "empty": "لا توجد طلبات مسجلة",
+          "removable": false,
+          "action": {
+            "type": "none"
+          }
+        }
+      ]
+    },
+    {
+      "id": "auth",
+      "title": "تسجيل الدخول",
+      "icon": "👤",
+      "subtitle": "إنشاء حساب أو تسجيل الدخول للمتجر",
+      "components": [
+        {
+          "type": "image",
+          "emoji": "🔐",
+          "caption": "مرحباً بك في متجر نوكس",
+          "height": 120
+        },
+        {
+          "type": "form",
+          "fields": [
+            {
+              "field": "name",
+              "label": "الاسم الكامل",
+              "placeholder": "أدخل اسمك",
+              "secure": false
+            },
+            {
+              "field": "email",
+              "label": "البريد الإلكتروني",
+              "placeholder": "example@nux.com",
+              "secure": false
+            },
+            {
+              "field": "phone",
+              "label": "رقم الهاتف",
+              "placeholder": "+966500000000",
+              "secure": false
+            },
+            {
+              "field": "role",
+              "label": "نوع الحساب (عميل / مدير)",
+              "placeholder": "عميل",
+              "secure": false
+            }
+          ],
+          "submitLabel": "تسجيل الدخول",
+          "action": {
+            "type": "add",
+            "data": "user"
+          }
+        },
+        {
+          "type": "button",
+          "label": "الانتقال للوحة الإدارة",
+          "action": {
+            "type": "navigate",
+            "target": "admin"
+          }
+        }
+      ]
+    },
+    {
+      "id": "admin",
+      "title": "لوحة الإدارة",
+      "icon": "⚙️",
+      "subtitle": "إدارة المنتجات والطلبات للمتجر",
+      "components": [
+        {
+          "type": "heading",
+          "text": "إضافة منتج جديد"
+        },
+        {
+          "type": "form",
+          "fields": [
+            {
+              "field": "title",
+              "label": "اسم المنتج",
+              "placeholder": "سماعات لاسلكية",
+              "secure": false
+            },
+            {
+              "field": "description",
+              "label": "الوصف",
+              "placeholder": "وصف قصير للمنتج",
+              "secure": false
+            },
+            {
+              "field": "price",
+              "label": "السعر",
+              "placeholder": "150 ر.س",
+              "secure": false
+            },
+            {
+              "field": "category",
+              "label": "القسم",
+              "placeholder": "إلكترونيات",
+              "secure": false
+            },
+            {
+              "field": "stock",
+              "label": "الكمية المتاحة",
+              "placeholder": "50",
+              "secure": false
+            }
+          ],
+          "submitLabel": "حفظ المنتج",
+          "action": {
+            "type": "add",
+            "data": "product"
+          }
+        },
+        {
+          "type": "heading",
+          "text": "إدارة المنتجات الحالية"
+        },
+        {
+          "type": "list",
+          "source": "product",
+          "titleField": "title",
+          "subtitleField": "category",
+          "empty": "لا توجد منتجات لإدارتها",
+          "removable": true,
+          "action": {
+            "type": "none"
+          }
+        }
+      ]
+    }
+  ],
+  "data": [
+    {
+      "name": "product",
+      "label": "المنتجات",
+      "fields": [
+        {
+          "name": "title",
+          "label": "اسم المنتج",
+          "type": "string"
+        },
+        {
+          "name": "description",
+          "label": "الوصف",
+          "type": "string"
+        },
+        {
+          "name": "price",
+          "label": "السعر",
+          "type": "string"
+        },
+        {
+          "name": "category",
+          "label": "القسم",
+          "type": "string"
+        },
+        {
+          "name": "stock",
+          "label": "المخزون",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "cart_item",
+      "label": "عناصر السلة",
+      "fields": [
+        {
+          "name": "product_id",
+          "label": "المنتج",
+          "type": "string"
+        },
+        {
+          "name": "quantity",
+          "label": "الكمية",
+          "type": "string"
+        },
+        {
+          "name": "unit_price",
+          "label": "السعر",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "order",
+      "label": "الطلبات",
+      "fields": [
+        {
+          "name": "user_id",
+          "label": "المستخدم",
+          "type": "string"
+        },
+        {
+          "name": "total_price",
+          "label": "الإجمالي",
+          "type": "string"
+        },
+        {
+          "name": "status",
+          "label": "الحالة",
+          "type": "string"
+        },
+        {
+          "name": "shipping_address",
+          "label": "عنوان الشحن",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "user",
+      "label": "المستخدمين",
+      "fields": [
+        {
+          "name": "name",
+          "label": "الاسم",
+          "type": "string"
+        },
+        {
+          "name": "email",
+          "label": "البريد الإلكتروني",
+          "type": "string"
+        },
+        {
+          "name": "phone",
+          "label": "الهاتف",
+          "type": "string"
+        },
+        {
+          "name": "role",
+          "label": "الصلاحية",
+          "type": "string"
+        }
+      ]
+    }
+  ],
+  "secrets": [
+    {
+      "key": "PAYMENT_GATEWAY_KEY",
+      "title": "مفتاح بوابة الدفع",
+      "reason": "لمعالجة عمليات الدفع الإلكتروني بأمان داخل التطبيق.",
+      "host": "api.stripe.com"
+    }
+  ],
+  "permissions": [
+    "NOTIFICATIONS"
+  ],
+  "features": [
+    "offline"
+  ],
+  "bottomNav": [
+    "home",
+    "cart",
+    "orders",
+    "auth"
+  ]
+}
