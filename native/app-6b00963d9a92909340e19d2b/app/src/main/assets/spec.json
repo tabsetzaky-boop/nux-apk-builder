@@ -1,0 +1,379 @@
+{
+  "version": 2,
+  "app": {
+    "name": "عداء المترو 3D",
+    "tagline": "اركض، تفادَ القطارات، واجمع النقاط!",
+    "package": "com.nux.d",
+    "description": "لعبة ركض ثلاثية الأبعاد لا نهائية مليئة بالحماس والتشويق مستوحاة من أسلوب صب واي سيرفرس مع تحكم سلس في 3 مسارات ومكافآت يومية.",
+    "icon": "📱",
+    "iconBackground": "#FF9500",
+    "iconForeground": "#FFFFFF",
+    "adaptive": true
+  },
+  "theme": {
+    "primary": "#FF9500",
+    "background": "#121212",
+    "surface": "#1E1E1E",
+    "text": "#FFFFFF",
+    "dark": true,
+    "radius": 16
+  },
+  "start": "main_menu",
+  "screens": [
+    {
+      "id": "main_menu",
+      "title": "الرئيسية",
+      "icon": "🏠",
+      "subtitle": "استعد للمغامرة",
+      "components": [
+        {
+          "type": "image",
+          "emoji": "🏃‍♂️",
+          "caption": "مغامرة الركض اللانهائي",
+          "height": 140
+        },
+        {
+          "type": "stat",
+          "label": "أعلى نتيجة",
+          "value": "128,450",
+          "source": ""
+        },
+        {
+          "type": "banner",
+          "text": "⚡ حدث الأسبوع: جمع ضعف العملات الذهبية في مسار المترو!"
+        },
+        {
+          "type": "button",
+          "label": "🚀 ابدأ اللعب الآن",
+          "action": {
+            "type": "navigate",
+            "target": "gameplay"
+          }
+        },
+        {
+          "type": "button",
+          "label": "🛒 متجر الشخصيات والتطويرات",
+          "action": {
+            "type": "navigate",
+            "target": "shop"
+          }
+        },
+        {
+          "type": "button",
+          "label": "🏆 لوحة المتصدرين",
+          "action": {
+            "type": "navigate",
+            "target": "leaderboard"
+          }
+        }
+      ]
+    },
+    {
+      "id": "gameplay",
+      "title": "شاشة اللعب 3D",
+      "icon": "🎮",
+      "subtitle": "تفادَ العوائق والقطارات",
+      "components": [
+        {
+          "type": "banner",
+          "text": "🏃‍♂️ أنت الآن في المسار الأوسط! اسحب أو اضغط للتحول بين 3 مسارات"
+        },
+        {
+          "type": "image",
+          "emoji": "🚇",
+          "caption": "قطار قادم! قفز أو انزلق سريعاً",
+          "height": 160
+        },
+        {
+          "type": "chips",
+          "items": [
+            "⬅️ مسار اليسار",
+            "⬆️ قفز",
+            "⬇️ انزلاق",
+            "➡️ مسار اليمين"
+          ]
+        },
+        {
+          "type": "divider"
+        },
+        {
+          "type": "button",
+          "label": "🛹 تفعيل اللوح الطائر (Hoverboard)",
+          "action": {
+            "type": "save",
+            "data": "player_profile"
+          }
+        },
+        {
+          "type": "button",
+          "label": "💥 اصطدام! (إنهاء الجولة)",
+          "action": {
+            "type": "navigate",
+            "target": "game_over"
+          }
+        }
+      ]
+    },
+    {
+      "id": "game_over",
+      "title": "نهاية الجولة",
+      "icon": "💀",
+      "subtitle": "أداء رائع!",
+      "components": [
+        {
+          "type": "heading",
+          "text": "تحطمت الجولة!"
+        },
+        {
+          "type": "stat",
+          "label": "النتيجة الحالية",
+          "value": "45,210",
+          "source": ""
+        },
+        {
+          "type": "stat",
+          "label": "العملات المجموعة",
+          "value": "350 🪙",
+          "source": ""
+        },
+        {
+          "type": "form",
+          "fields": [
+            {
+              "field": "score",
+              "label": "تسجيل النتيجة باسمك",
+              "placeholder": "أدخل اسمك للوحة الصدارة",
+              "secure": false
+            }
+          ],
+          "submitLabel": "حفظ النتيجة",
+          "action": {
+            "type": "add",
+            "data": "leaderboard_entry"
+          }
+        },
+        {
+          "type": "button",
+          "label": "🔄 إعادة اللعب",
+          "action": {
+            "type": "navigate",
+            "target": "gameplay"
+          }
+        },
+        {
+          "type": "button",
+          "label": "🏠 العودة للرئيسية",
+          "action": {
+            "type": "navigate",
+            "target": "main_menu"
+          }
+        }
+      ]
+    },
+    {
+      "id": "shop",
+      "title": "المتجر",
+      "icon": "🛒",
+      "subtitle": "الشخصيات والترقيات",
+      "components": [
+        {
+          "type": "chips",
+          "items": [
+            "الكل",
+            "شخصيات",
+            "زلاجات",
+            "مغناطيس",
+            "مضاعف النطاط"
+          ]
+        },
+        {
+          "type": "list",
+          "source": "shop_item",
+          "titleField": "name",
+          "subtitleField": "price",
+          "empty": "لا توجد عناصر متوفرة حالياً",
+          "removable": false,
+          "action": {
+            "type": "none"
+          }
+        },
+        {
+          "type": "divider"
+        },
+        {
+          "type": "heading",
+          "text": "إضافة عنصر جديد للمتجر"
+        },
+        {
+          "type": "form",
+          "fields": [
+            {
+              "field": "name",
+              "label": "اسم العنصر",
+              "placeholder": "مثال: لوح النينجا الخارق",
+              "secure": false
+            },
+            {
+              "field": "type",
+              "label": "النوع",
+              "placeholder": "شخصية / زلاجة / قوة",
+              "secure": false
+            },
+            {
+              "field": "price",
+              "label": "السعر (عملات)",
+              "placeholder": "5000",
+              "secure": false
+            }
+          ],
+          "submitLabel": "إضافة للمتجر",
+          "action": {
+            "type": "add",
+            "data": "shop_item"
+          }
+        }
+      ]
+    },
+    {
+      "id": "leaderboard",
+      "title": "المتصدرون",
+      "icon": "🏆",
+      "subtitle": "أفضل العدائين عالمياً",
+      "components": [
+        {
+          "type": "heading",
+          "text": "أعلى النقاط هذا الأسبوع"
+        },
+        {
+          "type": "list",
+          "source": "leaderboard_entry",
+          "titleField": "username",
+          "subtitleField": "score",
+          "empty": "لا يوجد متصدرون بعد، كن الأول!",
+          "removable": true,
+          "action": {
+            "type": "none"
+          }
+        },
+        {
+          "type": "button",
+          "label": "مسح سجل المتصدرين المحلي",
+          "action": {
+            "type": "clear",
+            "data": "leaderboard_entry"
+          }
+        }
+      ]
+    }
+  ],
+  "data": [
+    {
+      "name": "player_profile",
+      "label": "ملف اللاعب",
+      "fields": [
+        {
+          "name": "high_score",
+          "label": "أعلى نتيجة",
+          "type": "number"
+        },
+        {
+          "name": "coins",
+          "label": "العملات",
+          "type": "number"
+        },
+        {
+          "name": "keys",
+          "label": "المفاتيح",
+          "type": "number"
+        },
+        {
+          "name": "selected_character",
+          "label": "الشخصية المحددة",
+          "type": "string"
+        },
+        {
+          "name": "selected_board",
+          "label": "اللوح المحدد",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "shop_item",
+      "label": "عناصر المتجر",
+      "fields": [
+        {
+          "name": "item_id",
+          "label": "معرف العنصر",
+          "type": "string"
+        },
+        {
+          "name": "name",
+          "label": "اسم العنصر",
+          "type": "string"
+        },
+        {
+          "name": "type",
+          "label": "نوع العنصر",
+          "type": "string"
+        },
+        {
+          "name": "price",
+          "label": "السعر",
+          "type": "string"
+        },
+        {
+          "name": "is_unlocked",
+          "label": "مفتوح",
+          "type": "boolean"
+        }
+      ]
+    },
+    {
+      "name": "leaderboard_entry",
+      "label": "سجل المتصدرين",
+      "fields": [
+        {
+          "name": "username",
+          "label": "اسم اللاعب",
+          "type": "string"
+        },
+        {
+          "name": "score",
+          "label": "النتيجة",
+          "type": "string"
+        },
+        {
+          "name": "rank",
+          "label": "المرتبة",
+          "type": "number"
+        },
+        {
+          "name": "avatar_url",
+          "label": "الصورة",
+          "type": "string"
+        }
+      ]
+    }
+  ],
+  "secrets": [
+    {
+      "key": "GAME_SERVICES_API_KEY",
+      "title": "مفتاح خدمات الألعاب",
+      "reason": "ربط لوحة المتصدرين وحفظ الإنجازات سحابياً",
+      "host": "play.google.com"
+    }
+  ],
+  "permissions": [
+    "VIBRATE"
+  ],
+  "features": [
+    "offline"
+  ],
+  "bottomNav": [
+    "main_menu",
+    "gameplay",
+    "shop",
+    "leaderboard"
+  ]
+}
