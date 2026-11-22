@@ -1,0 +1,401 @@
+{
+  "version": 2,
+  "app": {
+    "name": "سباق التحدي 3D",
+    "tagline": "أقوى تجربة سباق سيارات واقعية 3D",
+    "package": "com.nux.d",
+    "description": "لعبة سباق سيارات محاكاة ثلاثية الأبعاد بعالَم مفتوح ومضامير متنوعة، تتيح لك شراء وتطوير أسرع السيارات والتنافس على المراكز الأولى.",
+    "icon": "📱",
+    "iconBackground": "#FF3B30",
+    "iconForeground": "#FFFFFF",
+    "adaptive": true
+  },
+  "theme": {
+    "primary": "#FF3B30",
+    "background": "#121212",
+    "surface": "#1E1E1E",
+    "text": "#FFFFFF",
+    "dark": true,
+    "radius": 16
+  },
+  "start": "main_menu",
+  "screens": [
+    {
+      "id": "main_menu",
+      "title": "القائمة الرئيسية",
+      "icon": "🏎️",
+      "subtitle": "مرحباً بك في عالم السرعة",
+      "components": [
+        {
+          "type": "image",
+          "emoji": "🏎️",
+          "caption": "استعد للانطلاق والمنافسة!",
+          "height": 140
+        },
+        {
+          "type": "stat",
+          "label": "إجمالي النقاط والمكافآت",
+          "value": "",
+          "source": "player_progress"
+        },
+        {
+          "type": "button",
+          "label": "🚀 ابدأ السباق الان",
+          "action": {
+            "type": "navigate",
+            "target": "track_select"
+          }
+        },
+        {
+          "type": "button",
+          "label": "🔧 الكراج وتعديل السيارات",
+          "action": {
+            "type": "navigate",
+            "target": "garage"
+          }
+        },
+        {
+          "type": "button",
+          "label": "🏆 سجل المتصدرين",
+          "action": {
+            "type": "navigate",
+            "target": "race_results"
+          }
+        }
+      ]
+    },
+    {
+      "id": "garage",
+      "title": "الكراج والتعديل",
+      "icon": "🔧",
+      "subtitle": "استعرض وعدّل سياراتك",
+      "components": [
+        {
+          "type": "heading",
+          "text": "السيارات المتاحة والتطوير"
+        },
+        {
+          "type": "list",
+          "source": "car",
+          "titleField": "name",
+          "subtitleField": "speed",
+          "empty": "لا توجد سيارات في كراجك حالياً، أضف سيارتك الأولى!",
+          "removable": true,
+          "action": {
+            "type": "none"
+          }
+        },
+        {
+          "type": "divider"
+        },
+        {
+          "type": "heading",
+          "text": "إضافة / شراء سيارة جديدة"
+        },
+        {
+          "type": "form",
+          "fields": [
+            {
+              "field": "name",
+              "label": "اسم السيارة",
+              "placeholder": "مثال: البرق السريع 3D",
+              "secure": false
+            },
+            {
+              "field": "speed",
+              "label": "السرعة القصوى (كم/س)",
+              "placeholder": "320",
+              "secure": false
+            },
+            {
+              "field": "acceleration",
+              "label": "التسارع (0-100)",
+              "placeholder": "2.8 ثانية",
+              "secure": false
+            },
+            {
+              "field": "price",
+              "label": "السعر (عملة)",
+              "placeholder": "5000",
+              "secure": false
+            }
+          ],
+          "submitLabel": "إضافة السيارة للكراج",
+          "action": {
+            "type": "add",
+            "data": "car"
+          }
+        }
+      ]
+    },
+    {
+      "id": "track_select",
+      "title": "اختيار المضمار",
+      "icon": "🗺️",
+      "subtitle": "اختر بيئة السباق والتحدي",
+      "components": [
+        {
+          "type": "chips",
+          "items": [
+            "حلبة المدينة 🏙️",
+            "سباق الصحراء 🏜️",
+            "الجبال الثلجية ❄️"
+          ]
+        },
+        {
+          "type": "list",
+          "source": "track",
+          "titleField": "name",
+          "subtitleField": "difficulty",
+          "empty": "لا توجد مضامير حالياً، أضف مضماراً جديداً للبناء",
+          "removable": false,
+          "action": {
+            "type": "none"
+          }
+        },
+        {
+          "type": "button",
+          "label": "🎮 انطلق إلى شاشة اللعب 3D",
+          "action": {
+            "type": "navigate",
+            "target": "gameplay_3d"
+          }
+        },
+        {
+          "type": "divider"
+        },
+        {
+          "type": "heading",
+          "text": "إنشاء مضمار جديد"
+        },
+        {
+          "type": "form",
+          "fields": [
+            {
+              "field": "name",
+              "label": "اسم المضمار",
+              "placeholder": "مضمار الليل الأخير",
+              "secure": false
+            },
+            {
+              "field": "difficulty",
+              "label": "مستوى الصعوبة",
+              "placeholder": "محترف / متوسط",
+              "secure": false
+            },
+            {
+              "field": "laps",
+              "label": "عدد اللفات",
+              "placeholder": "3",
+              "secure": false
+            }
+          ],
+          "submitLabel": "حفظ المضمار",
+          "action": {
+            "type": "add",
+            "data": "track"
+          }
+        }
+      ]
+    },
+    {
+      "id": "gameplay_3d",
+      "title": "شاشة اللعب 3D",
+      "icon": "🎮",
+      "subtitle": "السباق المباشر",
+      "components": [
+        {
+          "type": "banner",
+          "text": "⚡ وضع التوربو مفعل! استخدم أزرار التحكم لتجاوز المنافسين."
+        },
+        {
+          "type": "image",
+          "emoji": "🏁",
+          "caption": "محاكاة القيادة 3D - السرعة الحالية: 245 كم/س",
+          "height": 160
+        },
+        {
+          "type": "card",
+          "title": "عداد السرعة واللفة",
+          "text": "اللفة: 2 / 3 | الوقت: 01:12.45 | المركز: 1",
+          "action": {
+            "type": "none"
+          }
+        },
+        {
+          "type": "button",
+          "label": "🔥 تفعيل النيترو (Nitro)",
+          "action": {
+            "type": "none"
+          }
+        },
+        {
+          "type": "button",
+          "label": "🏁 إنهاء السباق وعرض النتائج",
+          "action": {
+            "type": "navigate",
+            "target": "race_results"
+          }
+        }
+      ]
+    },
+    {
+      "id": "race_results",
+      "title": "نتائج السباق",
+      "icon": "🏆",
+      "subtitle": "الملخص والمكافآت",
+      "components": [
+        {
+          "type": "heading",
+          "text": "🎉 تهانينا! المركز الأول"
+        },
+        {
+          "type": "card",
+          "title": "تفاصيل الأداء",
+          "text": "الوقت الإجمالي: 02:45.10 | أفضل لفة: 00:51.20 | الجائزة: 1,500 ذهبة",
+          "action": {
+            "type": "none"
+          }
+        },
+        {
+          "type": "heading",
+          "text": "تحديث تقدم اللاعب"
+        },
+        {
+          "type": "form",
+          "fields": [
+            {
+              "field": "coins",
+              "label": "مجموع الكوينز المكتسبة",
+              "placeholder": "1500",
+              "secure": false
+            },
+            {
+              "field": "high_score",
+              "label": "أفضل رقم قياسي",
+              "placeholder": "02:45.10",
+              "secure": false
+            },
+            {
+              "field": "level",
+              "label": "المستوى الحالي",
+              "placeholder": "5",
+              "secure": false
+            }
+          ],
+          "submitLabel": "تسجيل النتيجة في ملفك",
+          "action": {
+            "type": "save",
+            "data": "player_progress"
+          }
+        },
+        {
+          "type": "button",
+          "label": "🔄 سباق جديد",
+          "action": {
+            "type": "navigate",
+            "target": "track_select"
+          }
+        },
+        {
+          "type": "button",
+          "label": "🏠 العودة للقائمة الرئيسية",
+          "action": {
+            "type": "navigate",
+            "target": "main_menu"
+          }
+        }
+      ]
+    }
+  ],
+  "data": [
+    {
+      "name": "car",
+      "label": "السيارات",
+      "fields": [
+        {
+          "name": "name",
+          "label": "اسم السيارة",
+          "type": "string"
+        },
+        {
+          "name": "speed",
+          "label": "السرعة",
+          "type": "string"
+        },
+        {
+          "name": "acceleration",
+          "label": "التسارع",
+          "type": "string"
+        },
+        {
+          "name": "price",
+          "label": "السعر",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "track",
+      "label": "مضامير السباق",
+      "fields": [
+        {
+          "name": "name",
+          "label": "اسم المضمار",
+          "type": "string"
+        },
+        {
+          "name": "difficulty",
+          "label": "الصعوبة",
+          "type": "string"
+        },
+        {
+          "name": "laps",
+          "label": "عدد اللفات",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "player_progress",
+      "label": "تقدم اللاعب",
+      "fields": [
+        {
+          "name": "coins",
+          "label": "النقاط",
+          "type": "string"
+        },
+        {
+          "name": "level",
+          "label": "المستوى",
+          "type": "string"
+        },
+        {
+          "name": "high_score",
+          "label": "أعلى نتيجة",
+          "type": "string"
+        }
+      ]
+    }
+  ],
+  "secrets": [
+    {
+      "key": "PHOTON_APP_ID",
+      "title": "Photon Engine App ID",
+      "reason": "مطلوب لإدارة اللعب الجماعي والسباقات عبر الإنترنت في الوقت الفعلي",
+      "host": "dashboard.photonengine.com"
+    }
+  ],
+  "permissions": [
+    "VIBRATE"
+  ],
+  "features": [
+    "offline"
+  ],
+  "bottomNav": [
+    "main_menu",
+    "garage",
+    "track_select",
+    "race_results"
+  ]
+}
